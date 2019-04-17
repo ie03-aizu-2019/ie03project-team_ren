@@ -1,12 +1,18 @@
 import java.util.*;
 
+// 各点の座標(x, y)を持つクラス
+class N { int x, y; }
+
+// 各道路の情報を持つクラス
+class M { int p, q; }
+
 public class problem1_1 {
 
   Scanner sc = new Scanner(System.in);
   int N,M,P,Q;
-  int [][] listN;
-  int [][] listM;
   double answerX, answerY;
+  N[] nList;
+  M[] roads;
 
   public void input() {
     N = sc.nextInt();
@@ -14,69 +20,68 @@ public class problem1_1 {
     P = sc.nextInt();
     Q = sc.nextInt();
 
-    listN = new int[N][N];
-    listM = new int[M][M];
+    nList = new N[N+1];
+    roads = new M[M];
 
-    for(int i=0; i<N; i++) {
-      listN[i][0] = sc.nextInt();
-      listN[i][1] = sc.nextInt();
+    for(int i=1; i<=N; i++) {
+      nList[i] = new N();
+      nList[i].x = sc.nextInt();
+      nList[i].y = sc.nextInt();
     }
     for(int i=0; i<M; i++) {
-      listM[i][0] = sc.nextInt();
-      listM[i][1] = sc.nextInt();
+      roads[i] = new M();
+      roads[i].p = sc.nextInt();
+      roads[i].q = sc.nextInt();
     }
 
     sc.close();
   }
 
   public void compute() {
-    double y1 = listN[listM[0][1]-1][1] - listN[listM[0][0]-1][1];
-    double x2 = listN[listM[1][1]-1][0] - listN[listM[1][0]-1][0];
-    double x1 = listN[listM[0][1]-1][0] - listN[listM[0][0]-1][0];
-    double y2 = listN[listM[1][0]-1][1] - listN[listM[1][1]-1][1];
-    double formulaA = Math.abs( ((x1) * (y2)) + ((x2) * (y1)) );
 
-    double s, t, xp, yp;
+    double y1 = nList[roads[0].q].y - nList[roads[0].p].y;
+    double x2 = nList[roads[1].q].x - nList[roads[1].p].x;
+    double x1 = nList[roads[0].q].x - nList[roads[0].p].x;
+    double y2 = nList[roads[1].p].y - nList[roads[1].q].y;
+    double formulaA = Math.abs(((x1) * (y2)) + ((x2) * (y1)));
+    double s, t, xp, yp, yPq;
 
-    // Step1
-    if(formulaA == 0){
-      // 交差なし
+    if(formulaA == 0.0){
       output("NA");
       return;
     } else {
-      // Step2
-      xp = listN[listM[1][0]-1][0] - listN[listM[0][0]-1][0];
-      yp = listN[listM[1][0]-1][1] - listN[listM[0][0]-1][1];
-      double yPq = listN[listM[0][0]-1][1] - listN[listM[0][1]-1][1];
+      xp = nList[roads[1].p].x - nList[roads[0].p].x;
+      yp = nList[roads[1].p].y - nList[roads[0].p].y;
+      yPq = nList[roads[0].p].y - nList[roads[0].q].y;
       s = (y2*xp + x2*yp) * 1.0 / formulaA;
       t = (yPq*xp + x1*yp) * 1.0 / formulaA;
     }
 
-    // Step3
     if((s>=0.0 && s<=1.0) && (t>=0.0 && t<=1.0)) {
-      // Step4
-      answerX = listN[listM[0][0]-1][0] + x1 * s;
-      answerY = listN[listM[0][0]-1][1] + y1 * s;
-      for(int i=0; i<N; i++) {
-        if(answerX == listN[i][0] && answerY == listN[i][1]){
-          output("NA");
-          return;
-        } else {
-          output(answerX, answerY);
-        }
-      }
+      answerX = nList[roads[0].p].x + x1 * s;
+      answerY = nList[roads[0].p].y + y1 * s;
+      cross();
     } else {
-      // 交差なし
       output("NA");
       return;
     }
   }
 
-  public void output(double x, double y) {
-    System.out.printf("%.5f %.5f",x,y);
-    System.out.println();
+  // 交差地点が端点であるかの確認
+  public void cross() {
+    for(int i=1; i<=N; i++) {
+      if(answerX == nList[i].x && answerY == nList[i].y) {
+        output("NA");
+        return;
+      }
+      else {
+        output(answerX, answerY);
+        return;
+      }
+    }
   }
 
+  public void output(double x, double y) { System.out.printf("%.5f %.5f\n",x,y); }
   public void output(String message) { System.out.println(message); }
 
   public static void main(String[] args) {
