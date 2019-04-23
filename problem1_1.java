@@ -1,12 +1,11 @@
 import java.util.*;
 
-// 各点の座標(x, y)を持つクラス
-class N { int x, y; }
-
-// 各道路の情報を持つクラス
-class M { int p, q; }
-
 public class problem1_1 {
+  // 各点の座標(x, y)を持つクラス
+  class N { int x, y; }
+
+  // 各道路の情報を持つクラス
+  class M { int p, q; }
 
   Scanner sc = new Scanner(System.in);
   int N,M,P,Q;
@@ -14,7 +13,7 @@ public class problem1_1 {
   N[] nList;
   M[] roads;
 
-  public void input() {
+  public problem1_1() {
     N = sc.nextInt();
     M = sc.nextInt();
     P = sc.nextInt();
@@ -86,7 +85,6 @@ public class problem1_1 {
 
   public static void main(String[] args) {
     problem1_1 obj = new problem1_1();
-    obj.input();
     obj.compute();
   }
 }
