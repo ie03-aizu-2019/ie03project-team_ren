@@ -9,12 +9,15 @@ public class problem1_1 {
   // 交差地点を持つクラス
   class Answer {
     double x, y;
+    int id;
     public Answer(double a, double b) {
+      id = 0;
       x = a;
       y = b;
     }
     public double getX() { return x; }
     public double getY() { return y; }
+    public void setId(int number) { id = number; }
   }
 
   Scanner sc = new Scanner(System.in);
