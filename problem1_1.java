@@ -1,6 +1,7 @@
 import java.util.*;
 
 public class problem1_1 {
+
   // 各点の座標(x, y)を持つクラス
   class N { int x, y; }
 
@@ -72,8 +73,7 @@ public class problem1_1 {
       if(answerX == nList[i].x && answerY == nList[i].y) {
         output("NA");
         return;
-      }
-      else {
+      } else {
         output(answerX, answerY);
         return;
       }
