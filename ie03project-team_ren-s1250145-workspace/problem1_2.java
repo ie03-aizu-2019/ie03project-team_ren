@@ -1,5 +1,5 @@
 import java.util.*;
-import java.io.*;
+
 public class problem1_2 extends problem1_1 {
   public problem1_2() { super(); }
 

@@ -1,199 +1,294 @@
 import java.util.*;
 import java.io.*;
 
-// 各点の座標(x, y)を持つクラス
-class N {
-    double x, y;
+
+public class problem1_3 extends problem1_2{
+    
+    
+class check {
+    boolean Nfrag;
+    int No;
+    double dis;
+    public check(boolean Nflag, int No, double dis){
+	this.Nfrag = Nflag;
+	this.No = No;
+	this.dis = dis;
+    }
 }
 
-// 各道路の情報を持つクラス
-class M {
-    int p, q;
-    //交差地点の座標を保持
-    ArrayList<Double> pointx;
-    ArrayList<Double> pointy;
-    //距離を重みとして保持
-    ArrayList<Double> disp;   //地点→交差地点
-    ArrayList<Double> pdis;   //交差地点→地点
-    ArrayList<Double> dis;
-}
-
-// 最短経路探査に必要な情報を持つクラス
-class Q{
-    int  s, d, k;
-    int scheck, dcheck;
-}
-
-public class problem1_3 {
-
-    Scanner sc = new Scanner(System.in);
-    int N,M,P,Q;
-    double answerX, answerY;
-    N[] nList;
-    M[] roads;
-    Q[] sPath;
-
-    public void input() {
-	N = sc.nextInt();
-	M = sc.nextInt();
-	P = sc.nextInt();
-	Q = sc.nextInt();
-
-	String str = new String();
-
-	nList = new N[N+1];
-	roads = new M[M];
-	sPath = new Q[Q];
-
-	for(int i=1; i<=N; i++) {
-	    nList[i] = new N();
-	    nList[i].x = sc.nextInt();
-	    nList[i].y = sc.nextInt();
+    class SP extends check{
+	boolean Dflag;
+	public SP(boolean Nflag, int No, double dis){
+	    super(Nflag, No, dis);
+	    Dflag = false;
 	}
-	for(int i=0; i<M; i++) {
-	    roads[i] = new M();
-	    roads[i].pointx = new ArrayList<Double>();
-	    roads[i].pointy = new ArrayList<Double>();
-	    roads[i].disp = new ArrayList<Double>();
-	    roads[i].pdis = new ArrayList<Double>();
-	    roads[i].dis = new ArrayList<Double>();
-	    roads[i].p = sc.nextInt();
-	    roads[i].q = sc.nextInt();
-	}
-	for(int i=0; i<Q; i++) {
-	    sPath[i] = new Q();
-	    str = sc.next();
-	    if(isNum(String.valueOf(str.charAt(0))) == true){
-		sPath[i].scheck = 1;
-		sPath[i].s = Integer.parseInt(str);
-	    }
-	    else{
-		sPath[i].scheck = 0;
-		str = str.replace("C", "");
-		sPath[i].s = Integer.parseInt(str);		
-	    }
-	    str = sc.next();
-	    if(isNum(String.valueOf(str.charAt(0))) == true){
-		sPath[i].dcheck = 1;
-		str = str.replace("C", "");
-		sPath[i].d = Integer.parseInt(str);
-	    }
-	    else{
-		sPath[i].dcheck = 0;
-		//sPath[i].d = Integer.parseInt(str);
-	    }
-	    sPath[i].k = sc.nextInt();
-	}
-	
-	sc.close();
     }
 
-    public boolean isNum(String number) {
-	try {
-	    Integer.parseInt(number);
-	    return true;
-	} catch (NumberFormatException e) {
-	    return false;
+class TMP {
+   boolean Nfrag;
+    int No;
+    double x;
+    double y;
+
+    public TMP(boolean Nflag, int No, double x, double y){
+	this.Nfrag = Nflag;
+	this.No = No;
+	this.x = x;
+	this.y = y;
+    }
+}
+
+ class G{
+     ArrayList<check> node;
+     public G(){
+	 node = new ArrayList<check>();
+     }
+     public void SetNode(boolean Nflag, int No, double dis){
+	 boolean findFlag = false;
+	 for(int i=0; i<node.size(); i++){
+	     if(node.get(i).Nfrag == Nflag && node.get(i).No == No){
+		 findFlag= true;
+	     }
+	 }
+
+	 if(!findFlag){
+	     node.add(new check(Nflag, No, dis));
+	 }
+     }     
+}
+    public problem1_3(){ super(); }
+
+    ArrayList<G> NGraph = new ArrayList<G>();
+    ArrayList<G> CGraph= new ArrayList<G>();
+
+    //距離を重みとした重みつきグラフ
+    public void makeGraph(){
+	for(int i=0; i<N+1; i++){
+	    NGraph.add(new G());
 	}
-    } 
-
-    public void compute() {
-
-	for(int i=0; i<M-1; i++){
-	    for(int j=i+1; j<M; j++){
+	for(int i=0; i<answer.size(); i++){
+	    CGraph.add(new G());
+	}
+	for(int i =0; i<M; i++){
+	    ArrayList<TMP> tmp = new ArrayList<TMP>();  
+	    tmp.add(new TMP(true, roads[i].p,nList[roads[i].p].x ,nList[roads[i].p].y));
+	    tmp.add(new TMP(true, roads[i].q,nList[roads[i].q].x ,nList[roads[i].q].y));
 	    
-		double y1 = nList[roads[i].q].y - nList[roads[i].p].y;
-		double x2 = nList[roads[j].q].x - nList[roads[j].p].x;
-		double x1 = nList[roads[i].q].x - nList[roads[i].p].x;
-		double y2 = nList[roads[j].p].y - nList[roads[j].q].y;
-		double formulaA = Math.abs(((x1) * (y2)) + ((x2) * (y1)));
-		double s, t, xp, yp, yPq;
-		
-		if(formulaA == 0.0){
-		    roads[i].pointx.add(-1.0);
-		    roads[j].pointx.add(-1.0);
-		    roads[i].pointy.add(-1.0);
-		    roads[j].pointy.add(-1.0);
-		    distance();
-		    continue;
-		} else {
-		    xp = nList[roads[j].p].x - nList[roads[i].p].x;
-		    yp = nList[roads[j].p].y - nList[roads[i].p].y;
-		    yPq = nList[roads[i].p].y - nList[roads[i].q].y;
-		    s = (y2*xp + x2*yp) * 1.0 / formulaA;
-		    t = (yPq*xp + x1*yp) * 1.0 / formulaA;
+	    //交差地点
+	    for(int j=0; j<roads[i].pointx.size(); j++){
+		for(int k=0; k<answer.size(); k++){
+		    if(roads[i].pointx.get(j) == answer.get(k).getX() &&
+		       roads[i].pointy.get(j) == answer.get(k).getY()){
+			tmp.add(new TMP(false, answer.get(k).getId(),answer.get(k).getX(), answer.get(k).getY()));
+		    }
 		}
+	    }
+	    
+	    if(nList[roads[i].p].x != nList[roads[i].p].x){
+	    Collections.sort(tmp, new Comparator<TMP>(){
+		    public int compare(TMP tmp1, TMP tmp2){
+			return Double.compare(tmp1.x, tmp2.x);	
+		    }
+		});
+	    }
+	    else{
+	    Collections.sort(tmp, new Comparator<TMP>(){
+		    public int compare(TMP tmp1, TMP tmp2){
+			return Double.compare(tmp1.y, tmp2.y);
+		    }
+		});
+	    }
+
+	    /*System.out.println("miti:"+i);
+	    for(int j=0; j<tmp.size(); j++){
+		System.out.print(tmp.get(j).Nfrag + " " + tmp.get(j).x + " ");
+		System.out.println(tmp.get(j).y);
+		}*/
+	    for(int j=0; j<tmp.size(); j++){
 		
-		if((s>=0.0 && s<=1.0) && (t>=0.0 && t<=1.0)) {
-		    answerX = nList[roads[i].p].x + x1 * s;
-		    answerY = nList[roads[i].p].y + y1 * s;
-		    cross(i, j);
+		//System.out.println("----------tmp="+ tmp.size());
+		if(j==0){
+		    //System.out.println("----------sj="+ j);
+		    NGraph.get(tmp.get(j).No).SetNode(tmp.get(j+1).Nfrag, tmp.get(j+1).No,
+						      distance(tmp.get(j).x,tmp.get(j).y, tmp.get(j+1).x, tmp.get(j+1).y)); 
 		}
-		else {
-		    roads[i].pointx.add(-1.0);
-		    roads[j].pointx.add(-1.0);
-		    roads[i].pointy.add(-1.0);
-		    roads[j].pointy.add(-1.0);
-		    //output("NA");
-		    distance();
-		    continue;		
+		else if(j==tmp.size()-1){
+		    //  System.out.println("----------ej="+ j +"--"+ NGraph.size() + "--" + tmp.get(j).No);
+		    NGraph.get(tmp.get(j).No).SetNode(tmp.get(j-1).Nfrag, tmp.get(j-1).No,
+						      distance(tmp.get(j).x,tmp.get(j).y, tmp.get(j-1).x, tmp.get(j-1).y)); 
+		}
+		else{
+		    //System.out.println("----------cj="+ j);
+		    CGraph.get(tmp.get(j).No).SetNode(tmp.get(j+1).Nfrag, tmp.get(j+1).No,
+						      distance(tmp.get(j).x,tmp.get(j).y, tmp.get(j+1).x, tmp.get(j+1).y)); 
+		    CGraph.get(tmp.get(j).No).SetNode(tmp.get(j-1).Nfrag, tmp.get(j-1).No,
+						      distance(tmp.get(j).x,tmp.get(j).y, tmp.get(j-1).x, tmp.get(j-1).y)); 
 		}
 	    }
 	}
     }
     
-    // 交差地点が端点であるかの確認
-    public void cross(int I, int J) {
-	for(int i=1; i<=N; i++) {
-	    if(answerX == nList[i].x && answerY == nList[i].y) {
-		roads[I].pointx.add(-1.0);
-		roads[J].pointx.add(-1.0);
-		roads[I].pointy.add(-1.0);
-		roads[J].pointy.add(-1.0);
-		distance();  //ばぐ可能性
-		return ;
-	    }
-	}
-	roads[I].pointx.add(answerX);
-	roads[J].pointx.add(answerX);
-	roads[I].pointy.add(answerY);
-	roads[J].pointy.add(answerY);
-	distance();  //ばぐ可能性
-	//output(answerX, answerY);
-	return ;
+    //道ごとの距離を出す
+    public double distance(double x1, double y1, double x2, double y2){
+        
+	return Math.sqrt(Math.pow((x1 - x2), 2) +
+				   Math.pow((y1 - y2), 2));
     }
-    
-    //public void output(double x, double y) { System.out.printf("%.5f %.5f\n",x,y); }
-    //public void output(String message) { System.out.println(message); }
+
+    //最短経路を求める
 
     public void shortPath(){
-	
-    }
-
-    public void distance(){
-	int num = 0;
-	for(int i=0;i<M;i++){
-	    if(roads[i].pointx.get(num) == -1.0){
-		roads[i].dis.add(Math.sqrt(Math.pow((nList[roads[i].p].x - nList[roads[i].q].x), 2) +
-					   Math.pow((nList[roads[i].p].y - nList[roads[i].q].y), 2)));
-		roads[i].disp.add(-1.0);
-		roads[i].pdis.add(-1.0);
+	int s, d;
+	for(int i=0; i<Q; i++){
+	boolean sflag = false, dflag = false;
+	    if(sPath[i].scheck==1){
+		sflag = true;
+		if(sPath[i].s > N || sPath[i].s < 1){
+		    out();
+		    continue;
+		}
+		else{
+		s = sPath[i].s;
+		
+		//dijkstra(s, d, true);
+		}
 	    }
 	    else{
-		roads[i].disp.add(Math.sqrt(Math.pow((nList[roads[i].p].x - roads[i].pointx.get(num)), 2) +
-					    Math.pow((nList[roads[i].p].y - roads[i].pointy.get(num)), 2)));
-	    roads[i].disp.add(Math.sqrt(Math.pow((roads[i].pointx.get(num) - nList[roads[i].q].x), 2) +
-					Math.pow((roads[i].pointy.get(num) - nList[roads[i].q].y), 2)));
+		if(sPath[i].s - 1 >= answer.size() || sPath[i].s - 1 < 0){
+		    out();
+		    continue;
+		}
+		else{
+		    s = answer.get(sPath[i].s-1).getId();
+		    //dijkstra(s, d, false);
+		}
+	    }
+	    if(sPath[i].dcheck==1){
+		dflag = true;
+		if(sPath[i].d  > N || sPath[i].d < 1){
+		    out();
+		    continue;
+		}
+		else{
+		d = sPath[i].d;
+		}
+	    }
+	    else{
+		if(sPath[i].d - 1 >= answer.size() || sPath[i].d - 1 < 0){
+		    out();
+		    continue;
+		}
+		else{
+		    d = answer.get(sPath[i].d-1).getId() + 1;
+		}
+	    }
+	    dijkstra(s, sflag, d, dflag);
+	}
+    }
 
-		num++;
+    public void dijkstra(int s, boolean sflag, int d, boolean dflag){
+	int gs = NGraph.size() + CGraph.size();
+	ArrayList<SP> tmp = new ArrayList<SP>();
+	ArrayList<SP> ans = new ArrayList<SP>();
+	    ans.add(new SP(sflag,s,0));
+	if(sflag==true){
+	    for(int i=0; i<NGraph.get(s).node.size(); i++){
+		tmp.add(new SP(NGraph.get(s).node.get(i).Nfrag,
+				  NGraph.get(s).node.get(i).No,
+				  NGraph.get(s).node.get(i).dis));
+	    }
+	}
+	else{
+	    for(int i=0; i<CGraph.get(s).node.size(); i++){
+	    	tmp.add(new SP(CGraph.get(s).node.get(i).Nfrag,
+				  CGraph.get(s).node.get(i).No,
+				  CGraph.get(s).node.get(i).dis));
+	     }
+	}
+
+	
+	//for(int i=0; i<gs; i++){
+	while(tmp.size() != 0){  
+	    int min = -1;
+	    for(int j=0; j<tmp.size(); j++){
+		if(tmp.get(j).Dflag == false){
+		    if(min == -1 || tmp.get(min).dis > tmp.get(j).dis){
+			min = j;
+		    }
+		}
+	    }
+	    if(min != -1){
+		
+
+		if(tmp.get(min).Nfrag == true){
+		    for(int j=0; j<NGraph.get(tmp.get(min).No).node.size(); j++){
+			boolean tmpflag = false;
+			for(int k=0; k<ans.size(); k++){
+			    if(NGraph.get(tmp.get(min).No).node.get(j).No == ans.get(k).No &&
+			       NGraph.get(tmp.get(min).No).node.get(j).Nfrag == ans.get(k).Nfrag){
+				tmpflag = true;
+				break;
+			    }
+			}
+			if(tmpflag == false){
+			    tmp.add(new SP(NGraph.get(tmp.get(min).No).node.get(j).Nfrag,
+					   NGraph.get(tmp.get(min).No).node.get(j).No,
+					   NGraph.get(tmp.get(min).No).node.get(j).dis + tmp.get(min).dis));
+			}
+		    }
+		    ans.add(tmp.get(min));
+		    tmp.remove(min);
+		}
+		else{
+		   
+		    for(int j=0; j<CGraph.get(tmp.get(min).No).node.size(); j++){
+			boolean tmpflag = false;
+			for(int k=0; k<ans.size(); k++){
+			    if(CGraph.get(tmp.get(min).No).node.get(j).No == ans.get(k).No &&
+			       CGraph.get(tmp.get(min).No).node.get(j).Nfrag == ans.get(k).Nfrag){
+				tmpflag = true;
+				break;
+			    }
+			}
+			if(tmpflag == false){
+			    tmp.add(new SP(CGraph.get(tmp.get(min).No).node.get(j).Nfrag,
+					   CGraph.get(tmp.get(min).No).node.get(j).No,
+					   CGraph.get(tmp.get(min).No).node.get(j).dis + tmp.get(min).dis));
+			}
+		    }
+		    ans.add(tmp.get(min));
+		    tmp.remove(min);
+		}
+	    }
+	}
+	System.out.println("BBBBBBBBBBBBBB--" + d);
+	for(int i=0; i<ans.size(); i++){
+	    System.out.println(ans.get(i).No + "--" + ans.get(i).Nfrag + "--" +ans.get(i).dis);
+	    if(dflag == true){
+		if(ans.get(i).No == d && ans.get(i).Nfrag == dflag){
+		    System.out.println(ans.get(i).dis);
+		    break;
+		}
+	    }
+	    else{
+		if(ans.get(i).No == d - 1 && ans.get(i).Nfrag == dflag){
+		    System.out.println(ans.get(i).dis);
+		    break;
+		}
 	    }
 	}
     }
     
-    public static void main(String[] args) {
+
+    public void out(){
+	System.out.println("NA");
+    }
+    
+    public static void main(String[] args){
 	problem1_3 obj = new problem1_3();
-	obj.input();
 	obj.compute();
+	obj.sort();
+	obj.makeGraph();
 	obj.shortPath();
     }
 }
