@@ -2,7 +2,7 @@ import java.util.*;
 import java.io.*;
 
 
-public class problem1_3 extends problem1_2{
+public class problem1_4 extends problem1_2{
     
     
 class check {
@@ -17,8 +17,21 @@ class check {
 }
 
     class SP extends check{
+	ArrayList<check> From;
+	public SP(boolean Nflag, int No, double dis, ArrayList<check> from){
+	    super(Nflag, No, dis);
+	    check t = new check(Nflag, No, dis);
+	    From = new ArrayList<check>();
+	    for(int i=0; i<from.size(); i++){
+		From.add(from.get(i));
+	    }
+	    From.add(t);
+	}
 	public SP(boolean Nflag, int No, double dis){
 	    super(Nflag, No, dis);
+	    check t = new check(Nflag, No, dis);
+	    From = new ArrayList<check>();
+	    From.add(t);
 	}
     }
 
@@ -54,7 +67,7 @@ class TMP {
 	 }
      }     
 }
-    public problem1_3(){ super(); }
+    public problem1_4(){ super(); }
 
     ArrayList<G> NGraph = new ArrayList<G>();
     ArrayList<G> CGraph= new ArrayList<G>();
@@ -137,6 +150,7 @@ class TMP {
 
     public void shortPath(){
 	int s, d;
+	SP ans4;
 	for(int i=0; i<Q; i++){
 	boolean sflag = false, dflag = false;
 	    if(sPath[i].scheck==1){
@@ -180,58 +194,72 @@ class TMP {
 		    d = answer.get(sPath[i].d-1).getId() + 1;
 		}
 	    }
-	    dijkstra(s, sflag, d, dflag);
+	    ans4 =dijkstra(s, sflag, d, dflag, NGraph, CGraph);
+	    System.out.println(ans4.dis);
+	    for(int j=0; j<ans4.From.size() ;j++){
+		if(ans4.From.get(j).Nfrag == true){
+		    System.out.print(ans4.From.get(j).No+" ");
+		    		    }
+		else{
+		    ans4.From.get(j).No++;
+		    System.out.print("C" + ans4.From.get(j).No + " ");
+		}
+	    }
+	    System.out.println();
 	}
     }
 
-    public void dijkstra(int s, boolean sflag, int d, boolean dflag){
-	int gs = NGraph.size() + CGraph.size();
+    public SP dijkstra(int s, boolean sflag, int d, boolean dflag,
+		       ArrayList<G>NG, ArrayList<G>CG){
+	int gs = NG.size() + CG.size();
 	ArrayList<SP> tmp = new ArrayList<SP>();
 	ArrayList<SP> ans = new ArrayList<SP>();
-	    ans.add(new SP(sflag,s,0));
+	ArrayList<check> t = new ArrayList<check>();
+	t.add(new check(sflag, s, 0));
+	ans.add(new SP(sflag,s,0));
 	if(sflag==true){
-	    for(int i=0; i<NGraph.get(s).node.size(); i++){
-		tmp.add(new SP(NGraph.get(s).node.get(i).Nfrag,
-				  NGraph.get(s).node.get(i).No,
-				  NGraph.get(s).node.get(i).dis));
+	    for(int i=0; i<NG.get(s).node.size(); i++){
+		tmp.add(new SP(NG.get(s).node.get(i).Nfrag,
+			       NG.get(s).node.get(i).No,
+			       NG.get(s).node.get(i).dis,
+			       t));
 	    }
 	}
 	else{
-	    for(int i=0; i<CGraph.get(s).node.size(); i++){
-	    	tmp.add(new SP(CGraph.get(s).node.get(i).Nfrag,
-				  CGraph.get(s).node.get(i).No,
-				  CGraph.get(s).node.get(i).dis));
-	     }
+	    for(int i=0; i<CG.get(s).node.size(); i++){
+		tmp.add(new SP(CG.get(s).node.get(i).Nfrag,
+			       CG.get(s).node.get(i).No,
+			       CG.get(s).node.get(i).dis,
+			       t));
+	    }
 	}
-
+	
 	
 	//for(int i=0; i<gs; i++){
 	while(tmp.size() != 0){  
 	    int min = -1;
 	    for(int j=0; j<tmp.size(); j++){
-		if(tmp.get(j).Dflag == false){
 		    if(min == -1 || tmp.get(min).dis > tmp.get(j).dis){
 			min = j;
 		    }
-		}
-	    }
-	    if(min != -1){
+		}	    if(min != -1){
 		
 
 		if(tmp.get(min).Nfrag == true){
-		    for(int j=0; j<NGraph.get(tmp.get(min).No).node.size(); j++){
+		    for(int j=0; j<NG.get(tmp.get(min).No).node.size(); j++){
 			boolean tmpflag = false;
 			for(int k=0; k<ans.size(); k++){
-			    if(NGraph.get(tmp.get(min).No).node.get(j).No == ans.get(k).No &&
-			       NGraph.get(tmp.get(min).No).node.get(j).Nfrag == ans.get(k).Nfrag){
+			    if(NG.get(tmp.get(min).No).node.get(j).No == ans.get(k).No &&
+			       NG.get(tmp.get(min).No).node.get(j).Nfrag == ans.get(k).Nfrag){
 				tmpflag = true;
 				break;
 			    }
 			}
 			if(tmpflag == false){
-			    tmp.add(new SP(NGraph.get(tmp.get(min).No).node.get(j).Nfrag,
-					   NGraph.get(tmp.get(min).No).node.get(j).No,
-					   NGraph.get(tmp.get(min).No).node.get(j).dis + tmp.get(min).dis));
+			    tmp.add(new SP(NG.get(tmp.get(min).No).node.get(j).Nfrag,
+					   NG.get(tmp.get(min).No).node.get(j).No,
+					   NG.get(tmp.get(min).No).node.get(j).dis + tmp.get(min).dis,
+					   tmp.get(min).From));
 			}
 		    }
 		    ans.add(tmp.get(min));
@@ -239,19 +267,20 @@ class TMP {
 		}
 		else{
 		   
-		    for(int j=0; j<CGraph.get(tmp.get(min).No).node.size(); j++){
+		    for(int j=0; j<CG.get(tmp.get(min).No).node.size(); j++){
 			boolean tmpflag = false;
 			for(int k=0; k<ans.size(); k++){
-			    if(CGraph.get(tmp.get(min).No).node.get(j).No == ans.get(k).No &&
-			       CGraph.get(tmp.get(min).No).node.get(j).Nfrag == ans.get(k).Nfrag){
+			    if(CG.get(tmp.get(min).No).node.get(j).No == ans.get(k).No &&
+			       CG.get(tmp.get(min).No).node.get(j).Nfrag == ans.get(k).Nfrag){
 				tmpflag = true;
 				break;
 			    }
 			}
 			if(tmpflag == false){
-			    tmp.add(new SP(CGraph.get(tmp.get(min).No).node.get(j).Nfrag,
-					   CGraph.get(tmp.get(min).No).node.get(j).No,
-					   CGraph.get(tmp.get(min).No).node.get(j).dis + tmp.get(min).dis));
+			    tmp.add(new SP(CG.get(tmp.get(min).No).node.get(j).Nfrag,
+					   CG.get(tmp.get(min).No).node.get(j).No,
+					   CG.get(tmp.get(min).No).node.get(j).dis + tmp.get(min).dis,
+					   tmp.get(min).From));
 			}
 		    }
 		    ans.add(tmp.get(min));
@@ -259,22 +288,21 @@ class TMP {
 		}
 	    }
 	}
-	System.out.println("BBBBBBBBBBBBBB--" + d);
 	for(int i=0; i<ans.size(); i++){
-	    System.out.println(ans.get(i).No + "--" + ans.get(i).Nfrag + "--" +ans.get(i).dis);
 	    if(dflag == true){
 		if(ans.get(i).No == d && ans.get(i).Nfrag == dflag){
-		    System.out.println(ans.get(i).dis);
-		    break;
+		    //System.out.println(ans.get(i).dis);
+		    return ans.get(i);
 		}
 	    }
 	    else{
 		if(ans.get(i).No == d - 1 && ans.get(i).Nfrag == dflag){
-		    System.out.println(ans.get(i).dis);
-		    break;
+		    //System.out.println(ans.get(i).dis);
+		    return ans.get(i);
 		}
 	    }
 	}
+	return ans.get(0);
     }
     
 
@@ -283,7 +311,7 @@ class TMP {
     }
     
     public static void main(String[] args){
-	problem1_3 obj = new problem1_3();
+	problem1_4 obj = new problem1_4();
 	obj.compute();
 	obj.sort();
 	obj.makeGraph();
