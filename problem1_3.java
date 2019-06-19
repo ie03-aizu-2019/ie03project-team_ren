@@ -147,8 +147,6 @@ class TMP {
 		}
 		else{
 		s = sPath[i].s;
-		
-		//dijkstra(s, d, true);
 		}
 	    }
 	    else{
@@ -204,17 +202,13 @@ class TMP {
 	     }
 	}
 
-	
-	//for(int i=0; i<gs; i++){
 	while(tmp.size() != 0){  
 	    int min = -1;
 	    for(int j=0; j<tmp.size(); j++){
-		if(tmp.get(j).Dflag == false){
 		    if(min == -1 || tmp.get(min).dis > tmp.get(j).dis){
 			min = j;
 		    }
 		}
-	    }
 	    if(min != -1){
 		
 
@@ -259,9 +253,7 @@ class TMP {
 		}
 	    }
 	}
-	System.out.println("BBBBBBBBBBBBBB--" + d);
 	for(int i=0; i<ans.size(); i++){
-	    System.out.println(ans.get(i).No + "--" + ans.get(i).Nfrag + "--" +ans.get(i).dis);
 	    if(dflag == true){
 		if(ans.get(i).No == d && ans.get(i).Nfrag == dflag){
 		    System.out.println(ans.get(i).dis);
