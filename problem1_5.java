@@ -21,12 +21,22 @@ public class problem1_5 extends problem1_3 {
     obj.compute();
     obj.sort();
     obj.makeGraph();
+    //obj.debugOutput();
     obj.kShortestPath();
     obj.outWest();
   }
 
   public void outWest() {
-    for(int i=0; i<idx; i++) { System.out.println("id: " + i + ", sum: " + (s_west.get(i).getDistance() + t_west.get(i).getDistance())); }
+    for(int i=0; i<idx; i++) { System.out.println("id: " + i + ", sum: " + (s_west.get(i).getDistance())); }
+  }
+
+  void debugOutput() {
+    int gs = NGraph.size();
+    for(int i=0; i<gs; i++) {
+      for(int j=0; j<NGraph.get(i).node.size(); j++) {
+        System.out.println("i: " + i + ", j: " + j + ", flag: " + NGraph.get(i).node.get(j).Nfrag);
+      }
+    }
   }
 
   public double Dijkstra(int s, boolean sflag, int t, boolean dflag) {
@@ -53,11 +63,15 @@ public class problem1_5 extends problem1_3 {
     while(tmp.size() != 0){
       int min = -1;
       for(int j=0; j<tmp.size(); j++) {
-        if(tmp.get(j).Nfrag == false) { if(min == -1 || tmp.get(min).dis > tmp.get(j).dis) { min = j; } }
+        System.out.println("i: " + j + ", frag: " + tmp.get(j).Nfrag);
+        if(tmp.get(j).Nfrag == false) {
+          if(min == -1 || tmp.get(min).dis > tmp.get(j).dis) { min = j; }
+        }
       }
 
       if(min != -1) {
-        if(tmp.get(min).Nfrag == true) {
+        if(tmp.get(min).Nfrag) {
+          System.out.println("trueIf");
           for(int j=0; j < NGraph.get(tmp.get(min).No).node.size(); j++) {
             boolean tmpflag = false;
             for(int k=0; k<ans.size(); k++){
@@ -67,18 +81,14 @@ public class problem1_5 extends problem1_3 {
                 break;
               }
             }
-
             if(tmpflag == false){
               tmp.add(new SP(NGraph.get(tmp.get(min).No).node.get(j).Nfrag,
               NGraph.get(tmp.get(min).No).node.get(j).No,
               NGraph.get(tmp.get(min).No).node.get(j).dis + tmp.get(min).dis));
             }
           }
-          ans.add(tmp.get(min));
-          tmp.remove(min);
-        }
-
-        else {
+        } else {
+          System.out.println("falseIf");
           for(int j=0; j<CGraph.get(tmp.get(min).No).node.size(); j++) {
             boolean tmpflag = false;
             for(int k=0; k<ans.size(); k++) {
@@ -94,77 +104,83 @@ public class problem1_5 extends problem1_3 {
               CGraph.get(tmp.get(min).No).node.get(j).dis + tmp.get(min).dis));
             }
           }
-          ans.add(tmp.get(min));
-          tmp.remove(min);
         } // End else.
+        System.out.println("min = " + min);
+        ans.add(tmp.get(min));
+        tmp.remove(min);
       }
-    }
+    } // End of While.
 
     for(int i=0; i<ans.size(); i++) {
-      System.out.println(ans.get(i).No + "--" + ans.get(i).Nfrag + "--" +ans.get(i).dis);
+      //System.out.println(ans.get(i).No + "--" + ans.get(i).Nfrag + "--" +ans.get(i).dis);
       if(dflag == true) {
         if(ans.get(i).No == t && ans.get(i).Nfrag == dflag) {
           System.out.println(ans.get(i).dis);
           return ans.get(i).dis;
         }
       }
-
       else {
         if(ans.get(i).No == t - 1 && ans.get(i).Nfrag == dflag) {
           System.out.println(ans.get(i).dis);
           return ans.get(i).dis;
         }
       }
-
     } // End for loop.
-
     return 0.0;
   } // End dijkstra().
 
   // For v,
   public void WorkerN(int s, int t, boolean sflag) {
     int v;
+    double s_path;
     for(int i=0; i<N; i++) {
       for(int j=0; j<NGraph.get(i).node.size(); j++) {
         if(NGraph.get(i).node.get(j).Nfrag) { // 座標
           v = NGraph.get(i).node.get(j).No;
           if(v != s && visited[v] == 0 && v != t) {
             visited[v] = 1;
-            // System.out.println("Log-s, v: " + s + ", " + v);
+            s_path = Dijkstra(s, sflag, v, true);
+            s_west.add(new Distance(v));
+            s_west.get(idx++).setDistance(s_path);
+            System.out.println("Log-s, v: " + s + ", " + v);
           }
         } else { // 交差地点
           v = answer.get(NGraph.get(i).node.get(j).No).getId();
           if(visited[v+N+1] == 0) {
             visited[v+N+1] = 1;
-            // System.out.println("Cross point-Log-s, v: " + s + ", " + v);
+            s_path = Dijkstra(s, sflag, v, false);
+            s_west.add(new Distance(v));
+            s_west.get(idx++).setDistance(s_path);
+            System.out.println("Cross point-Log-s, v: " + s + ", " + v);
           }
         }
-        double s_path = Dijkstra(s, sflag, v, false);
-        s_west.add(new Distance(v));
-        s_west.get(idx++).setDistance(s_path);
       }
     }
   }
   public void WorkerC(int s, int t, boolean sflag) {
     int v;
+    double s_path;
     for(int i=0; i<answer.size(); i++) {
       for(int j=0; j<CGraph.get(i).node.size(); j++) {
         if(CGraph.get(i).node.get(j).Nfrag) { // 座標
           v = CGraph.get(i).node.get(j).No;
           if(v != s && visited[v] == 0 && v!= t) {
             visited[v] = 1;
-            // System.out.println("Log-s, v: " + s + ", " + v);
+            s_path = Dijkstra(s, sflag, v, true);
+            s_west.add(new Distance(v));
+            s_west.get(idx++).setDistance(s_path);
+            System.out.println("Log-s, v: " + s + ", " + v);
           }
         } else { // 交差地点
           v = answer.get(CGraph.get(i).node.get(j).No).getId();
           if(visited[v+N+1] == 0) {
             visited[v+N+1] = 1;
-            // System.out.println("Cross point-Log-s, v: " + s + ", " + v);
+            s_path = Dijkstra(s, sflag, v, false);
+            s_west.add(new Distance(v));
+            s_west.get(idx++).setDistance(s_path);
+            System.out.println("Cross point-Log-s, v: " + s + ", " + v);
           }
         }
-        double s_path = Dijkstra(s, sflag, v, true);
-        s_west.add(new Distance(v));
-        s_west.get(idx++).setDistance(s_path);
       }
     }
   }
@@ -218,8 +234,8 @@ public class problem1_5 extends problem1_3 {
       // From t,
       idx = 0;
       visited = new int[10];
-      WorkerN(t, s, tflag); // NGraph
-      WorkerC(t, s, tflag); // CGraph
+      // WorkerN(t, s, tflag); // NGraph
+      // WorkerC(t, s, tflag); // CGraph
     }
   }
 }
