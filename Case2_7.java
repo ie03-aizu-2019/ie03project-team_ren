@@ -1,31 +1,16 @@
-// This code is to create test cases for problem3.
-// case3.txt is output file.
-// case3.txt grammer
-// ----------------------------------------------
-//   Case No.
-//   Value_of_N Value_of_M Value_of_P Value_of_Q
-//   x0 y0
-//   .  .
-//   x_n-1 y_n-1
-//   b0 e0
-//   .  .
-//   b_n-1 e_n-1
-//   Case . . .
-//   .
-//   .
-//   .
-// -----------------------------------------------
+// This code is to create test cases for problem7.
+// case7.txt is output file.
 
 import java.util.*;
 import java.io.*;
 
-public class Case1_3 {
+public class Case2_7 {
   public static void main(String[] args) {
-    Case1_3 obj = new Case1_3();
+    Case2_7 obj = new Case2_7();
     int N = (int)(Math.random()*999)+2;
     int M = (int)(Math.random()*(N-2))+1;
-    int Q = (int)(Math.random()*101);
-    obj.makeCase(N, M, 0, Q);
+    int P = (int)(Math.random()*101);
+    obj.makeCase(N, M, P, 0);
   }
 
   public void makeCase(int N, int M, int P, int Q) {
@@ -53,19 +38,11 @@ public class Case1_3 {
         co++;
       }
 
-      for(int j=0; j<Q/2; j++) {
-        int i1 = (int)(Math.random()*N);
-        int i2 = (int)(Math.random()*N);
-        Collections.shuffle(list_M);
-        System.out.println(list_M.get(i1) + " " + list_M.get(i2) + " " + 1);
+      for(int j=0; j<P; j++) {
+        x = (int)(Math.random()*10001);
+        y = (int)(Math.random()*10001);
+        System.out.println(x + " " + y);
       }
-      for(int j=Q/2; j<Q; j++) {
-        int i1 = (int)(Math.random()*N);
-        int i2 = (int)(Math.random()*N);
-        Collections.shuffle(list_M);
-        System.out.println("C" + list_M.get(i1) + " " + list_M.get(i2) + " " + 1);
-      }
-
       System.out.println();
     }
   }
