@@ -4,12 +4,16 @@ import java.io.*;
 public class problem1_1 {
     
     // 各点の座標(x, y)を持つクラス
-    class N { int x, y; }
+    class N { double x, y; }
     // 各道路の情報を持つクラス
     class M { int p, q;
       	//交差地点の座標を保持
 	ArrayList<Double> pointx;
 	ArrayList<Double> pointy;
+    }
+    //道の追加のクラス
+    class P{
+	int x, y;
     }
     // 最短経路探査に必要な情報を持つクラス
     class Q{
@@ -38,6 +42,7 @@ public class problem1_1 {
     
     N[] nList;
     M[] roads;
+    P[] addN;
     Q[] sPath;
     ArrayList<Answer> answer = new ArrayList<Answer>();
     
@@ -62,6 +67,15 @@ public class problem1_1 {
 	    //1_3用追加
 	    roads[i].pointx = new ArrayList<Double>();
 	    roads[i].pointy = new ArrayList<Double>();
+	}
+
+	//1_4
+
+	addN = new P[P];
+	for(int i=0; i<P; i++){
+	    addN[i] = new P();
+	    addN[i].x = sc.nextInt();
+	    addN[i].y = sc.nextInt();
 	}
 	
 	//1_3用の追加
@@ -92,7 +106,7 @@ public class problem1_1 {
 		sPath[i].d = Integer.parseInt(str);
 	    }
 	    sPath[i].k = sc.nextInt();
-	}	
+	}
 	sc.close();
     }
     
